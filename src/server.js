@@ -602,5 +602,469 @@ plt.legend()
 plt.show()`);
 });
 
+app.use("/prog1", (req, res) => {
+  res.send(`import string
+import numpy as np
+
+ALPHABET = string.ascii_uppercase
+MOD = 26
+
+# CAESAR CIPHER
+
+def caesar_encrypt(text, shift):
+    result = ""
+    for char in text.upper():
+        if char in ALPHABET:
+            index = (ALPHABET.index(char) + shift) % MOD
+            result += ALPHABET[index]
+        else:
+            result += char
+    return result
+
+
+def caesar_decrypt(cipher, shift):
+    return caesar_encrypt(cipher, -shift)
+
+
+#  SUBSTITUTION CIPHER
+
+def substitution_encrypt(text, key):
+    """
+    key must be 26 unique uppercase letters
+    Example:
+    QWERTYUIOPASDFGHJKLZXCVBNM
+    """
+    text = text.upper()
+    result = ""
+    for char in text:
+        if char in ALPHABET:
+            result += key[ALPHABET.index(char)]
+        else:
+            result += char
+    return result
+
+
+def substitution_decrypt(cipher, key):
+    result = ""
+    for char in cipher:
+        if char in key:
+            result += ALPHABET[key.index(char)]
+        else:
+            result += char
+    return result
+
+
+# HILL CIPHER (2x2 Matrix Only)
+
+def mod_inverse(a, m):
+    for x in range(1, m):
+        if (a * x) % m == 1:
+            return x
+    return None
+
+
+def process_text_hill(text):
+    text = ''.join([c for c in text. Upper() if c in ALPHABET])
+    if len(text) % 2 != 0:
+        text += 'X'
+    return text
+
+
+def hill_encrypt(text, key_matrix):
+    text = process_text_hill(text)
+    cipher = ""
+
+    for i in range(0, len(text), 2):
+        pair = text[i:i+2]
+        vector = [ALPHABET.index(pair[0]), ALPHABET.index(pair[1])]
+        result = np.dot(key_matrix, vector) % MOD
+        cipher += ALPHABET[result[0]] + ALPHABET[result[1]]
+
+    return cipher
+
+
+def hill_decrypt(cipher, key_matrix):
+    det = int(np.round(np.linalg.det(key_matrix)))
+    det = det % MOD
+    det_inv = mod_inverse(det, MOD)
+
+    if det_inv is None:
+        raise ValueError("Key matrix is not invertible")
+
+    adjugate = np.round(det * np.linalg.inv(key_matrix)).astype(int) % MOD
+    inverse_matrix = (det_inv * adjugate) % MOD
+
+    plain = ""
+
+    for i in range(0, len(cipher), 2):
+        pair = cipher[i:i+2]
+        vector = [ALPHABET.index(pair[0]), ALPHABET.index(pair[1])]
+        result = np.dot(inverse_matrix, vector) % MOD
+        plain += ALPHABET[result[0]] + ALPHABET[result[1]]
+
+    return plain
+
+
+#  VIGENERE CIPHER
+
+def vigenere_encrypt(text, key):
+    text = text.upper()
+    key = key.upper()
+    result = ""
+    key_index = 0
+
+    for char in text:
+        if char in ALPHABET:
+            shift = ALPHABET.index(key[key_index % len(key)])
+            index = (ALPHABET.index(char) + shift) % MOD
+            result += ALPHABET[index]
+            key_index += 1
+        else:
+            result += char
+    return result
+
+
+def vigenere_decrypt(cipher, key):
+    cipher = cipher.upper()
+    key = key.upper()
+    result = ""
+    key_index = 0
+
+    for char in cipher:
+        if char in ALPHABET:
+            shift = ALPHABET.index(key[key_index % len(key)])
+            index = (ALPHABET.index(char) - shift) % MOD
+            result += ALPHABET[index]
+            key_index += 1
+        else:
+            result += char
+    return result
+
+
+# MAIN FUNCTION
+
+def main():
+    print("\n===== CLASSICAL CIPHERS =====")
+    print("1. Caesar Cipher")
+    print("2. Substitution Cipher")
+    print("3. Hill Cipher (2x2)")
+    print("4. Vigenere Cipher")
+
+    choice = int(input("Choose algorithm (1-4): "))
+
+    text = input("Enter text: ")
+
+    if choice == 1:
+        shift = int(input("Enter shift value: "))
+        enc = caesar_encrypt(text, shift)
+        dec = caesar_decrypt(enc, shift)
+
+    elif choice == 2:
+        key = input("Enter 26-letter substitution key: ").upper()
+        enc = substitution_encrypt(text, key)
+        dec = substitution_decrypt(enc, key)
+
+    elif choice == 3:
+        print("Enter 2x2 key matrix values:")
+        a = int(input("a: "))
+        b = int(input("b: "))
+        c = int(input("c: "))
+        d = int(input("d: "))
+        key_matrix = np.array([[a, b], [c, d]])
+        enc = hill_encrypt(text, key_matrix)
+        dec = hill_decrypt(enc, key_matrix)
+
+    elif choice == 4:
+        key = input("Enter keyword: ")
+        enc = vigenere_encrypt(text, key)
+        dec = vigenere_decrypt(enc, key)
+
+    else:
+        print("Invalid choice")
+        return
+
+    print("\nEncrypted Text :", enc)
+    print("Decrypted Text :", dec)
+
+
+if __name__ == "__main__":
+    main()
+`);
+});
+
+app.use("/prog2", (req, res) => {
+  res.send(`#S-DES IMPLEMENTATION
+
+# Permutation Tables
+P10 = [3,5,2,7,4,10,1,9,8,6]
+P8  = [6,3,7,4,8,5,10,9]
+IP  = [2,6,3,1,4,8,5,7]
+IP_INV = [4,1,3,5,7,2,8,6]
+EP  = [4,1,2,3,2,3,4,1]
+P4  = [2,4,3,1]
+
+# S-Boxes
+S0 = [[1,0,3,2],
+      [3,2,1,0],
+      [0,2,1,3],
+      [3,1,3,2]]
+
+S1 = [[0,1,2,3],
+      [2,0,1,3],
+      [3,0,1,0],
+      [2,1,0,3]]
+
+# Basic Functions 
+
+def permute(bits, table):
+    return ''.join(bits[i-1] for i in table)
+
+def left_shift(bits, n):
+    return bits[n:] + bits[:n]
+
+def xor(a, b):
+    return ''.join('0' if a[i] == b[i] else '1' for i in range(len(a)))
+
+def sbox(bits, box):
+    row = int(bits[0] + bits[3], 2)
+    col = int(bits[1] + bits[2], 2)
+    return format(box[row][col], '02b')
+
+# Key Generation
+
+def generate_keys(key):
+    key = permute(key, P10)
+    
+    left = left_shift(key[:5], 1)
+    right = left_shift(key[5:], 1)
+    K1 = permute(left + right, P8)
+
+    left = left_shift(left, 2)
+    right = left_shift(right, 2)
+    K2 = permute(left + right, P8)
+
+    return K1, K2
+
+# Round Function 
+
+def fk(bits, key):
+    left = bits[:4]
+    right = bits[4:]
+
+    temp = permute(right, EP)
+    temp = xor(temp, key)
+
+    s0_out = sbox(temp[:4], S0)
+    s1_out = sbox(temp[4:], S1)
+
+    temp = permute(s0_out + s1_out, P4)
+    left = xor(left, temp)
+
+    return left + right
+
+#Encryption 
+
+def encrypt(plaintext, key):
+    K1, K2 = generate_keys(key)
+
+    bits = permute(plaintext, IP)
+    bits = fk(bits, K1)
+
+    bits = bits[4:] + bits[:4]  # Swap halves
+
+    bits = fk(bits, K2)
+
+    ciphertext = permute(bits, IP_INV)
+    return ciphertext
+
+# Decryption 
+
+def decrypt(ciphertext, key):
+    K1, K2 = generate_keys(key)
+
+    bits = permute(ciphertext, IP)
+    bits = fk(bits, K2)
+
+    bits = bits[4:] + bits[:4]  # Swap halves
+
+    bits = fk(bits, K1)
+
+    plaintext = permute(bits, IP_INV)
+    return plaintext
+
+
+key = input("Enter 10-bit key: ")
+plaintext = input("Enter 8-bit plaintext: ")
+
+cipher = encrypt(plaintext, key)
+print("Ciphertext:", cipher)
+print("Decrypted :", decrypt(cipher, key))
+`);
+});
+
+app.use("/prog3", (req, res) => {
+  res.send(`import random
+from math import gcd
+
+def mod_inverse(e, phi):
+    for d in range(1, phi):
+        if (d * e) % phi == 1:
+            return d
+
+def rsa_keygen():
+    p, q = 61, 53
+    n = p * q
+    phi = (p-1)*(q-1)
+    e = 17
+    d = mod_inverse(e, phi)
+    return (e, n), (d, n)
+
+def rsa_encrypt(msg, pub):
+    e, n = pub
+    return pow(msg, e, n)
+
+def rsa_decrypt(cipher, priv):
+    d, n = priv
+    return pow(cipher, d, n)
+
+
+pub, priv = rsa_keygen()
+cipher = rsa_encrypt(65, pub)
+plain = rsa_decrypt(cipher, priv)
+print("Encrypted:", cipher)
+print("Decrypted:", plain)
+`);
+});
+
+app.use("/prog4", (req, res) => {
+  res.send(`def diffie_hellman():
+    p = 23
+    g = 5
+    a = 6
+    b = 15
+    A = pow(g, a, p)
+    B = pow(g, b, p)
+
+    shared_A = pow(B, a, p)
+    shared_B = pow(A, b, p)
+    print("Shared Key:", shared_A)
+diffie_hellman()
+`);
+});
+
+app.use("/prog5", (req, res) => {
+  res.send(`import hashlib
+
+def sha1_digest(text):
+    return hashlib.sha1(text.encode()).hexdigest()
+
+print("SHA-1:", sha1_digest("Hello World"))
+`);
+});
+
+app.use("/prog6", (req, res) => {
+  res.send(`def sign(message, priv):
+    digest = int(hashlib.sha1(message.encode()).hexdigest(), 16)
+    return pow(digest, priv[0], priv[1])
+
+def verify(message, signature, pub):
+    digest = int(hashlib.sha1(message.encode()).hexdigest(), 16)
+    return digest == pow(signature, pub[0], pub[1])
+
+signature = sign("Hello", priv)
+print("Verified:", verify("Hello", signature, pub))
+`);
+});
+
+app.use("/prog7", (req, res) => {
+  res.send(`Step 1: Install required package
+pip install cryptography
+
+Step 2: SSL Server
+# ssl_server_auto.py
+
+import socket
+import ssl
+from cryptography import x509
+from cryptography.x509.oid import NameOID
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
+import datetime
+
+# Generate private key
+key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+
+# Generate self-signed certificate
+subject = issuer = x509.Name([
+    x509.NameAttribute(NameOID.COUNTRY_NAME, u"IN"),
+    x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, u"Karnataka"),
+    x509.NameAttribute(NameOID.LOCALITY_NAME, u"Bangalore"),
+    x509.NameAttribute(NameOID.ORGANIZATION_NAME, u"Test Org"),
+    x509.NameAttribute(NameOID.COMMON_NAME, u"localhost"),
+])
+
+cert = (
+    x509.CertificateBuilder()
+    .subject_name(subject)
+    .issuer_name(issuer)
+    .public_key(key.public_key())
+    .serial_number(x509.random_serial_number())
+    .not_valid_before(datetime.datetime.utcnow())
+    .not_valid_after(datetime.datetime.utcnow() + datetime.timedelta(days=365))
+    .sign(key, hashes.SHA256())
+)
+
+# Save certificate and key
+with open("server.key", "wb") as f:
+    f.write(key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.TraditionalOpenSSL,
+        encryption_algorithm=serialization.NoEncryption()
+    ))
+
+with open("server.crt", "wb") as f:
+    f.write(cert.public_bytes(serialization.Encoding.PEM))
+
+# SSL server
+HOST = '127.0.0.1'
+PORT = 8443
+
+context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+context.load_cert_chain("server.crt", "server.key")
+
+with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+    sock.bind((HOST, PORT))
+    sock.listen(5)
+    print("Secure server running...")
+
+    with context.wrap_socket(sock, server_side=True) as ssock:
+        conn, addr = ssock.accept()
+        print("Connected:", addr)
+
+        data = conn.recv(1024)
+        print("Client says:", data.decode())
+
+        conn.send(b"Hello Client, secure connection successful!")
+
+Step 3: SSL Client
+
+# ssl_client.py
+
+import socket
+import ssl
+
+HOST = '127.0.0.1'
+PORT = 8443
+
+context = ssl._create_unverified_context()
+
+with socket.create_connection((HOST, PORT)) as sock:
+    with context.wrap_socket(sock, server_hostname=HOST) as ssock:
+        print("SSL connection established")
+
+        ssock.send(b"Hello Server")
+        print(ssock.recv(1024).decode())
+`);
+});
 // Export app for testing or further usage
 export default app;
