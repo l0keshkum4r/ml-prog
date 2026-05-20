@@ -1066,5 +1066,605 @@ with socket.create_connection((HOST, PORT)) as sock:
         print(ssock.recv(1024).decode())
 `);
 });
+
+app.use("/flutter/p1", (req, res) => {
+  res.send(`import 'package:flutter/material.dart';
+
+void main() => runApp(MaterialApp(home: CardPage()));
+
+class CardPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext c) {
+    return Scaffold(
+      body: Center(
+        child: Card(
+          margin: EdgeInsets.all(20),
+          child: Padding(
+            padding: EdgeInsets.all(15),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        "ABC TECHNOLOGIES",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18),
+                      ),
+                    ),
+                    Icon(Icons.business,size: 40)
+                  ],
+                ),
+                SizedBox(height: 10),
+                Text("Snehal Rathi",
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                Text("Software Engineer"),
+                Divider(),
+                Text("Phone: 9876543210"),
+                Text("Email: snehal@abc.com"),
+                Text("Fax: 020-123456"),
+                Text("Website: www.abctech.com"),
+                Text("Address: Pune"),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}`);
+});
+
+app.use("/flutter/p2", (req, res) => {
+  res.send(`import 'package:flutter/material.dart';
+
+void main() => runApp(MaterialApp(home: SignUp()));
+
+class SignUp extends StatefulWidget {
+  @override
+  State<SignUp> createState() => _SignUpState();
+}
+
+class _SignUpState extends State<SignUp> {
+  var u = TextEditingController(), p = TextEditingController();
+
+  bool valid(String s) {
+    return s.length >= 8 &&
+        RegExp(r'[A-Z]').hasMatch(s) &&
+        RegExp(r'[a-z]').hasMatch(s) &&
+        RegExp(r'[0-9]').hasMatch(s) &&
+        RegExp(r'[^A-Za-z0-9]').hasMatch(s);
+  }
+
+  @override
+  Widget build(BuildContext c) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Sign Up")),
+      body: Padding(
+        padding: EdgeInsets.all(20),
+        child: Column(children: [
+          TextField(controller: u, decoration: InputDecoration(labelText: "Username")),
+          TextField(controller: p, obscureText: true,
+              decoration: InputDecoration(labelText: "Password")),
+          ElevatedButton(
+            child: Text("SIGN UP"),
+            onPressed: () {
+              if (valid(p.text)) {
+                Navigator.push(c,
+                    MaterialPageRoute(builder: (_) => Login(u.text, p.text)));
+              } else {
+                ScaffoldMessenger.of(c).showSnackBar(
+                    SnackBar(content: Text("Invalid Password")));
+              }
+            },
+          )
+        ]),
+      ),
+    );
+  }
+}
+
+class Login extends StatefulWidget {
+  final String u, p;
+  Login(this.u, this.p);
+
+  @override
+  State<Login> createState() => _LoginState();
+}
+
+class _LoginState extends State<Login> {
+  var u = TextEditingController(), p = TextEditingController();
+  int tries = 2;
+  bool disable = false;
+
+  @override
+  Widget build(BuildContext c) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Login")),
+      body: Padding(
+        padding: EdgeInsets.all(20),
+        child: Column(children: [
+          TextField(controller: u, decoration: InputDecoration(labelText: "Username")),
+          TextField(controller: p, obscureText: true,
+              decoration: InputDecoration(labelText: "Password")),
+          ElevatedButton(
+            onPressed: disable
+                ? null
+                : () {
+                    if (u.text == widget.u && p.text == widget.p) {
+                      Navigator.push(c,
+                          MaterialPageRoute(builder: (_) => Success()));
+                    } else {
+                      tries--;
+                      if (tries == 0) {
+                        setState(() => disable = true);
+                        ScaffoldMessenger.of(c).showSnackBar(
+                            SnackBar(content: Text("Failed Login Attempts")));
+                      } else {
+                        ScaffoldMessenger.of(c).showSnackBar(
+                            SnackBar(content: Text("Login Failed")));
+                      }
+                    }
+                  },
+            child: Text("SIGN IN"),
+          )
+        ]),
+      ),
+    );
+  }
+}
+
+class Success extends StatelessWidget {
+  @override
+  Widget build(BuildContext c) {
+    return Scaffold(
+      body: Center(
+        child: Text("Successful Login",
+            style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold)),
+      ),
+    );
+  }
+}`);
+});
+
+app.use("/flutter/p3", (req, res) => {
+  res.send(`import 'dart:async';
+import 'package:flutter/material.dart';
+
+void main() => runApp(MaterialApp(home: CounterPage()));
+
+class CounterPage extends StatefulWidget {
+  @override
+  State<CounterPage> createState() => _CounterPageState();
+}
+
+class _CounterPageState extends State<CounterPage> {
+  int n = 1;
+  Timer? t;
+
+  void start() {
+    t = Timer.periodic(Duration(seconds: 1), (_) {
+      setState(() => n++);
+    });
+  }
+
+  void stop() => t?.cancel();
+
+  @override
+  Widget build(BuildContext c) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Counter")),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text("$n", style: TextStyle(fontSize: 40)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(onPressed: start, child: Text("START")),
+                SizedBox(width: 20),
+                ElevatedButton(onPressed: stop, child: Text("STOP")),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}`);
+});
+
+app.use("/flutter/p4", (req, res) => {
+  res.send(`import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+
+void main() => runApp(MaterialApp(home: TTS()));
+
+class TTS extends StatelessWidget {
+  final t = TextEditingController();
+  final f = FlutterTts();
+
+  @override
+  Widget build(BuildContext c) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Text To Speech")),
+      body: Padding(
+        padding: EdgeInsets.all(20),
+        child: Column(children: [
+          TextField(controller: t,
+              decoration: InputDecoration(labelText: "Enter Text")),
+          ElevatedButton(
+            child: Text("Convert Text to Speech"),
+            onPressed: () => f.speak(t.text),
+          )
+        ]),
+      ),
+    );
+  }
+}`);
+});
+
+app.use("/flutter/p5", (req, res) => {
+  res.send(`<uses-permission android:name="android.permission.READ_CONTACTS"/>
+<uses-permission android:name="android.permission.WRITE_CONTACTS"/>
+<uses-permission android:name="android.permission.CALL_PHONE"/>
+
+import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_contacts/flutter_contacts.dart';
+void main() {
+runApp(MyApp());
+}
+class MyApp extends StatelessWidget {
+@override
+Widget build(BuildContext context) {
+return MaterialApp(
+debugShowCheckedModeBanner: false,
+home: DialerPage(),
+);
+}
+}
+class DialerPage extends StatefulWidget {
+@override
+_DialerPageState createState() => _DialerPageState();
+}
+class _DialerPageState extends State<DialerPage> {
+TextEditingController phoneController = TextEditingController();
+
+void callNumber() async {
+String number = phoneController.text;
+if (number.isNotEmpty) {
+final Uri callUri = Uri(scheme: 'tel', path: number);
+await launchUrl(callUri);
+}
+}
+
+void saveContact() async {
+if (await FlutterContacts.requestPermission()) {
+final contact = Contact()
+..name.first = "Saved Number"
+..phones = [Phone(phoneController.text)];
+await contact.insert();
+ScaffoldMessenger.of(context).showSnackBar(
+SnackBar(content: Text("Contact Saved Successfully")),
+);
+}
+}
+@override
+Widget build(BuildContext context) {
+return Scaffold(
+appBar: AppBar(
+title: Text("Phone Dialer"),
+),
+body: Padding(
+padding: EdgeInsets.all(20),
+child: Column(
+mainAxisAlignment: MainAxisAlignment.center,
+children: [
+TextField(
+controller: phoneController,
+keyboardType: TextInputType.phone,
+decoration: InputDecoration(
+labelText: "Enter Phone Number",
+border: OutlineInputBorder(),
+),
+),
+SizedBox(height: 30),
+Row(
+mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+children: [
+ElevatedButton(
+onPressed: callNumber,
+child: Text("CALL"),
+),
+ElevatedButton(
+onPressed: saveContact,
+child: Text("SAVE"),
+),
+],
+),
+],
+),
+),
+);
+}
+}`);
+});
+
+app.use("/flutter/p6", (req, res) => {
+  res.send(`import 'package:flutter/material.dart';
+import 'package:audioplayers/audioplayers.dart';
+
+void main() => runApp(MaterialApp(home: Player()));
+
+class Player extends StatefulWidget {
+  @override
+  State<Player> createState() => _PlayerState();
+}
+
+class _PlayerState extends State<Player> {
+  AudioPlayer a = AudioPlayer();
+  Duration d = Duration.zero, p = Duration.zero;
+  bool play = false;
+
+  @override
+  void initState() {
+    super.initState();
+    a.onDurationChanged.listen((x) => setState(() => d = x));
+    a.onPositionChanged.listen((x) => setState(() => p = x));
+  }
+
+  @override
+  Widget build(BuildContext c) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Media Player")),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Slider(
+            value: p.inSeconds.toDouble(),
+            max: d.inSeconds.toDouble(),
+            onChanged: (v) => a.seek(Duration(seconds: v.toInt())),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(
+                  icon: Icon(Icons.fast_rewind),
+                  onPressed: () => a.seek(p - Duration(seconds: 10))),
+              IconButton(
+                icon: Icon(play ? Icons.pause : Icons.play_arrow),
+                onPressed: () async {
+                  if (play)
+                    await a.pause();
+                  else
+                    await a.play(AssetSource("audio.mp3"));
+                  setState(() => play = !play);
+                },
+              ),
+              IconButton(
+                  icon: Icon(Icons.fast_forward),
+                  onPressed: () => a.seek(p + Duration(seconds: 10))),
+            ],
+          )
+        ],
+      ),
+    );
+  }
+}`);
+});
+
+app.use("/flutter/p7", (req, res) => {
+  res.send(`import 'package:flutter/material.dart';
+
+void main() => runApp(MaterialApp(home: Largest()));
+
+class Largest extends StatefulWidget {
+  @override
+  State<Largest> createState() => _LargestState();
+}
+
+class _LargestState extends State<Largest> {
+  var a = TextEditingController(),
+      b = TextEditingController(),
+      c = TextEditingController();
+
+  String r = "";
+
+  void find() {
+    int x = int.parse(a.text),
+        y = int.parse(b.text),
+        z = int.parse(c.text);
+
+    setState(() => r = "Largest: ${[x, y, z].reduce((i, j) => (i > j ? i : j))}");
+  }
+
+  @override
+  Widget build(BuildContext c) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Largest")),
+      body: Padding(
+        padding: EdgeInsets.all(20),
+        child: Column(children: [
+          TextField(controller: a, decoration: InputDecoration(labelText: "No 1")),
+          TextField(controller: b, decoration: InputDecoration(labelText: "No 2")),
+          TextField(controller: c, decoration: InputDecoration(labelText: "No 3")),
+          ElevatedButton(onPressed: find, child: Text("Find")),
+          Text(r, style: TextStyle(fontSize: 20))
+        ]),
+      ),
+    );
+  }
+}`);
+});
+
+app.use("/flutter/p8", (req, res) => {
+  res.send(`import 'package:flutter/material.dart';
+
+void main() => runApp(MaterialApp(home: Counter()));
+
+class Counter extends StatefulWidget {
+  @override
+  State<Counter> createState() => _CounterState();
+}
+
+class _CounterState extends State<Counter> {
+  int n = 0;
+
+  @override
+  Widget build(BuildContext c) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Counter")),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text("$n", style: TextStyle(fontSize: 40)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                    onPressed: () => setState(() => n++),
+                    child: Text("Increase")),
+                SizedBox(width: 20),
+                ElevatedButton(
+                    onPressed: () => setState(() => n--),
+                    child: Text("Decrease")),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}`);
+});
+
+app.use("/flutter/p9", (req, res) => {
+  res.send(`import 'package:flutter/material.dart';
+
+void main() => runApp(MaterialApp(home: Register()));
+
+class Register extends StatefulWidget {
+  @override
+  State<Register> createState() => _RegisterState();
+}
+
+class _RegisterState extends State<Register> {
+  String g = "Male";
+  bool terms = false, sub = false;
+
+  @override
+  Widget build(BuildContext c) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Registration")),
+      body: ListView(
+        padding: EdgeInsets.all(20),
+        children: [
+          TextField(decoration: InputDecoration(labelText: "Name")),
+          TextField(decoration: InputDecoration(labelText: "Email")),
+          TextField(
+            obscureText: true,
+            decoration: InputDecoration(labelText: "Password"),
+          ),
+          RadioListTile(
+            title: Text("Male"),
+            value: "Male",
+            groupValue: g,
+            onChanged: (v) => setState(() => g = v.toString()),
+          ),
+          RadioListTile(
+            title: Text("Female"),
+            value: "Female",
+            groupValue: g,
+            onChanged: (v) => setState(() => g = v.toString()),
+          ),
+          CheckboxListTile(
+            title: Text("Agree Terms"),
+            value: terms,
+            onChanged: (v) => setState(() => terms = v!),
+          ),
+          CheckboxListTile(
+            title: Text("Subscribe"),
+            value: sub,
+            onChanged: (v) => setState(() => sub = v!),
+          ),
+          ElevatedButton(
+            child: Text("Submit"),
+            onPressed: () {
+              ScaffoldMessenger.of(c).showSnackBar(
+                SnackBar(
+                    content: Text(
+                        terms ? "Registration Successful" : "Agree Terms")),
+              );
+            },
+          )
+        ],
+      ),
+    );
+  }
+}`);
+});
+
+app.use("/flutter/p10", (req, res) => {
+  res.send(`import 'package:flutter/material.dart';
+
+void main() => runApp(MaterialApp(home: Calc()));
+
+class Calc extends StatefulWidget {
+  @override
+  State<Calc> createState() => _CalcState();
+}
+
+class _CalcState extends State<Calc> {
+  var a = TextEditingController(), b = TextEditingController();
+  String r = "";
+
+  void calc(String op) {
+    double x = double.parse(a.text), y = double.parse(b.text);
+
+    setState(() {
+      if (op == "+") r = "${x + y}";
+      if (op == "-") r = "${x - y}";
+      if (op == "*") r = "${x * y}";
+      if (op == "/") r = y != 0 ? "${x / y}" : "Cannot divide by zero";
+    });
+  }
+
+  @override
+  Widget build(BuildContext c) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Calculator")),
+      body: Padding(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextField(controller: a,
+                decoration: InputDecoration(labelText: "First Number")),
+            TextField(controller: b,
+                decoration: InputDecoration(labelText: "Second Number")),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(onPressed: () => calc("+"), child: Text("+")),
+                ElevatedButton(onPressed: () => calc("-"), child: Text("-")),
+                ElevatedButton(onPressed: () => calc("*"), child: Text("×")),
+                ElevatedButton(onPressed: () => calc("/"), child: Text("÷")),
+              ],
+            ),
+            SizedBox(height: 20),
+            Text(r, style: TextStyle(fontSize: 25))
+          ],
+        ),
+      ),
+    );
+  }
+}`);
+});
+
 // Export app for testing or further usage
 export default app;
