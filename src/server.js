@@ -1666,5 +1666,217 @@ class _CalcState extends State<Calc> {
 }`);
 });
 
+app.use("/nosql/p3", (req, res) => {
+  res.send(`// Step 1. Create a database
+use weatherDB      
+// Step 2. Create collection 
+	db.createCollection(“weather”)
+// Step 3. Insert data into Collection
+          db.weather.insertMany([
+             { city: "Bangalore", date: "2026-04-20", temperature: 30 },
+             { city: "Bangalore", date: "2026-04-21", temperature: 32 },
+             { city: "Bangalore", date: "2026-04-22", temperature: 29 },
+            { city: "Mysore", date: "2026-04-21", temperature: 35 },
+             { city: "Mysore", date: "2026-04-22", temperature: 33 }
+             ]);
+// step 4: Find Maximum Temperature 
+               db.weather.aggregate([
+                       {
+                            $group: {
+                                  _id: null,
+                                      maxTemperature: { $max: "$temperature" }
+                                             }
+                           }
+                  ]);
+
+// Step 5. Find Maximum Temperature City-wise
+	db.weather.aggregate([
+                   {
+                          $group: {
+                        _id: "$city",
+                          maxTemperature: { $max: "$temperature" }
+                                       }
+                         }
+               ]);
+// Step 6: Find Full Document of Maximum Temperature
+	db.weather.find().sort({ temperature: -1 }).limit(1);
+`);
+});
+
+app.use("/nosql/p4", (req, res) => {
+  res.send(`// Step 1. Create a database
+use school        
+// Step 2. Create collection 
+	db.createCollection(“students”)
+// Step 3. Insert data into Collection
+	db.students.insertMany([
+
+	  {
+
+  	  rollNo: 1dt22is098
+
+  	  name: "Anita",
+
+    	age: 21,
+
+    	department: "ECE",
+
+   	 marks: 89
+
+	  },
+
+  	{
+
+  	  rollNo: 1dt22is093,
+
+ 	   name: "Vikram",
+	
+ 	   age: 22,
+
+  	  department: "CSE",
+
+    	   marks:56
+	
+ 	 },
+
+	  {
+
+  	  rollNo: 1dt22is0984,
+
+    	  name: "Sneha",
+
+   	 age: 20,
+	
+    	 department: "ME",
+
+   	 marks: 88
+
+  	}
+
+	])
+
+Basic Queries
+1.	db.students.find() ------- display all record
+2.	db.students.find().pretty()
+3.	db.students.find({ department: "CSE" })e
+4.	db.students.find({ marks: { $gt: 80 } }) " 
+5.	db.students.find(: 
+{},
+{ name: 1, marks: 1, _id: 0 }
+)"CSE"
+6  6. db.students.findOne({ rollNo: 1dt22is093 })
+    7.      db.students.updateOne(
+              { rollNo: 1dt22is093 },
+              { $set: { marks: 82 } })
+     8.    db.students.deleteOne({ rollNo: 1dt22is093 })
+`);
+});
+
+app.use("/nosql/p5", (req, res) => {
+  res.send(`// Create Database
+use collegeDB
+
+// Insert Records
+db.students.insertMany([
+{ roll: 1, name: "Anu", dept: "CSE", marks: 85, city: "Mumbai" },
+{ roll: 2, name: "Ravi", dept: "ECE", marks: 78, city: "Delhi" },
+{ roll: 3, name: "Meena", dept: "CSE", marks: 92, city: "Mumbai" },
+{ roll: 4, name: "Kiran", dept: "EEE", marks: 74, city: "Chennai" },
+{ roll: 5, name: "Arjun", dept: "ECE", marks: 88, city: "Delhi" }
+])
+
+// Count students by department
+db.students.aggregate([
+{ $group: { _id: "$dept", totalStudents: { $sum: 1 } } }
+])
+
+// Find average marks by department
+db.students.aggregate([
+{ $group: { _id: "$dept", avgMarks: { $avg: "$marks" } } }
+])
+
+// Sort departments by average marks
+db.students.aggregate([
+{ $group: { _id: "$dept", avgMarks: { $avg: "$marks" } } },
+{ $sort: { avgMarks: -1 } }
+])
+
+// Find maximum marks in each department
+db.students.aggregate([
+{ $group: { _id: "$dept", maxMarks: { $max: "$marks" } } }
+])
+
+// Find minimum marks in each department
+db.students.aggregate([
+{ $group: { _id: "$dept", minMarks: { $min: "$marks" } } }
+])
+
+// Find total marks by department
+db.students.aggregate([
+{ $group: { _id: "$dept", totalMarks: { $sum: "$marks" } } }
+])
+
+// Find departments having average marks greater than 80
+db.students.aggregate([
+{ $group: { _id: "$dept", avgMarks: { $avg: "$marks" } } },
+{ $match: { avgMarks: { $gt: 80 } } }
+])
+
+// Count students city-wise
+db.students.aggregate([
+{ $group: { _id: "$city", totalStudents: { $sum: 1 } } }
+])
+`);
+});
+
+app.use("/nosql/p6", (req, res) => {
+  res.send(`// Step 1. Create a database
+use College       
+// Step 2. Create collection 
+	db.createCollection(“students”)
+// Step 3. Insert data into Collection
+db.students.insertMany ([
+{ name: "Ravi", age: 20, dept: "CSE", marks: 80 },
+{name: "Anu", age: 21, dept: "ISE", marks: 75 },
+{name: "Kiran", age: 22, dept: "CSE", marks: 85 },
+{name: "Meena", age: 20, dept: "ECE", marks: 70}
+	])
+// Step 3. Display Data
+          db.students.find()
+
+ UPDATE OPERATIONS 
+// Step 4. Update one document
+           db.students.updateOne(
+                 { name: "Ravi" },
+                 { $set: { age: 23 } }
+               )
+           db.students.find({ name: "Ravi" })
+
+// Step 5: Update multiple documents
+db.students.updateMany(
+  { dept: "CSE" },
+  { $set: { status: "Active" } }
+)
+db.students.find()
+// step 6: Increment marks
+db.students.updateOne(
+  { name: "Anu" },
+  { $inc: { marks: 5 } }
+)
+
+DELETE OPERATIONS 
+// Step 7: Delete one document
+	db.students.deleteOne({ name: "Meena" })
+
+	db.students.find()
+
+// Step 8: Delete multiple documents
+		db.students.deleteMany({ dept: "CSE" })
+
+// Step 9: Delete all documents
+		db.students.deleteMany({})
+`);
+});
+
 // Export app for testing or further usage
 export default app;
